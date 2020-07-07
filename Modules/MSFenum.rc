@@ -1,0 +1,189 @@
+setg threads 10
+spool logs/smb_version.log
+use auxiliary/scanner/smb/smb_version
+set RHOSTS file:ports/445
+
+run
+spool off
+
+setg threads 10
+spool logs/smb_ms17_010.log
+use auxiliary/scanner/smb/smb_ms17_010
+set RHOSTS file:ports/445
+
+run
+spool off
+
+setg threads 10
+spool logs/cve_2019_0708_bluekeep.log
+use auxiliary/scanner/rdp/cve_2019_0708_bluekeep
+set RHOSTS file:ports/3389
+
+run
+spool off
+
+setg threads 10
+spool logs/smb_enumshares.log
+use auxiliary/scanner/smb/smb_enumshares
+set RHOSTS file:ports/445
+
+run
+spool off
+
+setg threads 10
+spool logs/mssql_login.log
+use auxiliary/scanner/mssql/mssql_login
+set RHOSTS file:ports/1433
+
+set username sa
+set password sa
+run
+spool off
+
+setg threads 10
+spool logs/mssql_ping.log
+use auxiliary/scanner/mssql/mssql_ping
+set RHOSTS file:ports/1433
+
+run
+spool off
+
+setg threads 10
+spool logs/webdav_scanner.log
+use auxiliary/scanner/http/webdav_scanner
+set RHOSTS file:ports/80
+
+run
+spool off
+
+setg threads 10
+spool logs/vnc_login.log
+use auxiliary/scanner/vnc/vnc_login
+set RHOSTS file:ports/5900
+
+run
+spool off
+
+setg threads 10
+spool logs/vnc_none_auth.log
+use auxiliary/scanner/vnc/vnc_none_auth
+set RHOSTS file:ports/5900
+
+run
+spool off
+
+setg threads 10
+spool logs/ipmi_version.log
+use auxiliary/scanner/ipmi/ipmi_version
+set RHOSTS file:ports/623
+
+run
+spool off
+
+setg threads 10
+spool logs/ipmi_dumphashes.log
+use auxiliary/scanner/ipmi/ipmi_dumphashes
+set RHOSTS file:ports/623
+
+run
+spool off
+
+setg threads 10
+spool logs/ipmi_cipher_zero.log
+use auxiliary/scanner/ipmi/ipmi_cipher_zero
+set RHOSTS file:ports/623
+
+run
+spool off
+
+setg threads 10
+spool logs/nfsmount.log
+use auxiliary/scanner/nfs/nfsmount
+set RHOSTS file:ports/111
+
+run
+spool off
+
+setg threads 10
+spool logs/open_x11.log
+use auxiliary/scanner/x11/open_x11
+set RHOSTS file:ports/6000
+
+run
+spool off
+
+setg threads 10
+spool logs/telnet_login.log
+use auxiliary/scanner/telnet/telnet_login
+set RHOSTS file:ports/23
+
+set username admin
+set password admin
+run
+set username root
+set password root
+run
+spool off
+
+setg threads 10
+spool logs/ssh_version.log
+use auxiliary/scanner/ssh/ssh_version
+set RHOSTS file:ports/22
+
+run
+spool off
+
+setg threads 10
+spool logs/ssh_login.log
+use auxiliary/scanner/ssh/ssh_login
+set RHOSTS file:ports/22
+
+set username admin
+set password admin
+run
+set username root
+set password root
+run
+spool off
+
+setg threads 10
+spool logs/ftpanonymous.log
+use auxiliary/scanner/ftp/anonymous
+set RHOSTS file:ports/21
+
+run
+spool off
+
+setg threads 10
+spool logs/ftp_version.log
+use auxiliary/scanner/ftp/ftp_version
+set RHOSTS file:ports/21
+
+run
+spool off
+
+setg threads 10
+spool logs/openssl_heartbleed.log
+use auxiliary/scanner/ssl/openssl_heartbleed
+set RHOSTS file:ports/443
+
+run
+spool off
+
+setg threads 10
+spool logs/openssl_ccs.log
+use auxiliary/scanner/ssl/openssl_ccs
+set RHOSTS file:ports/443
+
+run
+spool off
+
+setg threads 10
+spool logs/postgres_login.log
+use auxiliary/scanner/postgres/postgres_login
+set RHOSTS file:ports/5432
+
+run
+spool off
+
+exit -y
