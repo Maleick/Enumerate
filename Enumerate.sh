@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.00
+# Enumerate.sh Version: 1.01
 # Author: Maleick
-# Date: 7/6/20
+# Date: 7/7/20
 
 cat << "EOF"                                                                 
 $$$$$$$$\                                                                 $$\               
@@ -17,8 +17,8 @@ $$$$$$$$\ $$ |  $$ |\$$$$$$  |$$ | $$ | $$ |\$$$$$$$\ $$ |     \$$$$$$$ | \$$$$ 
 EOF
 
 # Import Variables
-source /opt/Enumerate/Modules/variables.sh  
-source /opt/Enumerate/Modules/functions.sh
+source /opt/enumerate/lib/variables.sh  
+source /opt/enumerate/lib/functions.sh
 
 # Help Text
 if [ $# -eq 0 ]; then
