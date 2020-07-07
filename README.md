@@ -5,18 +5,18 @@ Enumerate all the things!
 
 ### Installation
 ```bash
-sudo git clone https://github.com/Maleick/Enumerate.git /opt/Enumerate
+sudo git clone https://github.com/Maleick/Enumerate.git /opt/enumerate
 ```
 
 ### Global Usage
 ```bash
-ln -s /opt/Enumerate/Enumerate.sh /usr/local/bin
+ln -s /opt/enumerate/enumerate.sh /usr/local/bin
 ```
 
 ### Usage
 Enumerate requires both a iplist (can be CIDR) and exclusions to be fed to it even if it is an empty file.
 ```bash
-/opt/Enumerate.sh iplist.txt exclusions.txt
+/opt/enumerate.sh iplist.txt exclusions.txt
 ```
 
 ### Thanks
