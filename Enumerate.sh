@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.01
+# Enumerate.sh Version: 1.1
 # Author: Maleick
 # Date: 7/7/20
 
 cat << "EOF"                                                                 
+
 $$$$$$$$\                                                                 $$\               
 $$  _____|                                                                $$ |              
 $$ |      $$$$$$$\  $$\   $$\ $$$$$$\$$$$\   $$$$$$\   $$$$$$\  $$$$$$\ $$$$$$\    $$$$$$\  
@@ -16,45 +17,54 @@ $$$$$$$$\ $$ |  $$ |\$$$$$$  |$$ | $$ | $$ |\$$$$$$$\ $$ |     \$$$$$$$ | \$$$$ 
 
 EOF
 
-# Import Variables
-source /opt/enumerate/lib/variables.sh  
-source /opt/enumerate/lib/functions.sh
+# Define Variables
+LIB='/opt/Enumerate/lib'
+EXE='/opt/Enumerate/exe'
 
-# Help Text
+# Import
+. $LIB/colors.sh
+. $LIB/ports.sh
+. $LIB/tools.sh
+. $LIB/nmap.sh
+. $LIB/cme.sh
+. $LIB/aquatone.sh
+. $LIB/misc.sh
+
+# Usage
 if [ $# -eq 0 ]; then
-	echo "${RED}Usage: $0 iplist.txt exclusions.txt"
+	echo "$red Usage: $0 iplist.txt exclusions.txt"
 	exit 1
 else
 	IPLIST=$1
 	EXCLUD=$2
 fi
 
-	echo "${YELLOW}Enumerate Hosts"
-NmapHosts
-wait
-	echo "${GREEN}Enumerate Ports"
-NmapPorts
-wait
-	echo "${RED}Enumerate Ports"
-EnumPorts
-wait
-# Threading
-	echo "${GREEN}Enumerate Anonymous Shares"
-EnumCME &
-P1=$!
-	echo "${YELLOW}Emumerate Null Sessions"
-EnumDomain &
-P2=$!
-	echo "${RED}Enumerate FTP"
-EnumFTP &
-P3=$!
-	echo "${GREEN}Enumerate Metasploit Auxiliary"
-EnumMSF &
-P4=$!
-	echo "${YELLOW}Enumerate the Webs"
-EnumWeb &
-P5=$!
+# Make Directories
+$MKDIR -p aquatone cme domain enumdom ftp logs ports
 
-wait $P1 $P2 $P3 $P4 $P5
+# Call Functions
+echo "$green Enumerating Ports $white"
+PortScan
+echo
+echo "$green Enumerate Port Files $white"
+python $LIB/NmapParser.py
+echo
+echo "$green Enumerate Null Sessions $white-$red BG $white"
+EnumDomain
+echo
+echo "$green Enumerate FTP $white-$red BG $white"
+EnumFTP
+echo
+echo "$green Enumerate Anonymous Shares $white-$red BG $white"
+EnumCME
+echo
+echo "$green Enumerate Metasploit $white-$red BG $white"
+EnumMSF
+echo
+echo "$green Enumerate Webs $white-$red BG $white"
+EnumAqua
 
-echo "${RED}Finn!"
+# Wait for jobs to complete
+wait
+
+echo "$red Enumerated!"

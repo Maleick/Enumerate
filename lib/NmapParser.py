@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # NmapParser.py v1.0
-# Maleick 7/06/20
+# Maleick 7/7/20
 
 import re
 import os
