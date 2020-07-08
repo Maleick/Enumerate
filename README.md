@@ -5,18 +5,18 @@ Enumerate all the things!
 
 ### Install
 
-You can install this via the command-line with either `curl` or `wget`, whichever is installed on your machine.
+You can install this via the command-line with either `curl` or `wget`.
 
 #### via curl
 
 ```shell
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/Maleick/Enumerate/master/install.sh)"
 ```
 
 #### via wget
 
 ```shell
-sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sudo sh -c "$(wget -O- https://raw.githubusercontent.com/Maleick/Enumerate/master/install.sh)"
 ```
 
 ### Usage
