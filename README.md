@@ -21,7 +21,10 @@ sudo sh -c "$(wget -O- https://raw.githubusercontent.com/Maleick/Enumerate/maste
 
 ### Usage
 
-Enumerate requires root, iplist (can be CIDR), and exclusions to be fed to it even if it is an empty file.
+Enumerate requires:
+- root privlages
+- list of IP addresses
+- list of IP exclusions even if it is an empty file
 
 ```shell
 sudo enumerate iplist.txt exclusions.txt
