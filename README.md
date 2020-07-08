@@ -22,7 +22,7 @@ sudo sh -c "$(wget -O- https://raw.githubusercontent.com/Maleick/Enumerate/maste
 ### Usage
 
 Enumerate requires:
-- root privlages
+- root privileges
 - list of IP addresses
 - list of IP exclusions even if it is an empty file
 
