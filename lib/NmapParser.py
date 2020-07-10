@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# NmapParser.py v1.0
-# Maleick 7/7/20
 
 import re
 import os
@@ -8,7 +6,7 @@ import os
 if not os.path.exists('ports/'):
 	os.makedirs('ports/')
 
-ports_file = open('ports.gnmap').read().split('\n')
+ports_file = open('nmap/ports.gnmap').read().split('\n')
 
 for line in ports_file:
 	ip_address = line[line.find(":")+2:line.find("(")-1]
