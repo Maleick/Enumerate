@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 HostScan (){
-	$NMAP -sn -iL $IPLIST --excludefile $EXCLUD -oG - | awk '/Up/{print $2}' > nmap/hosts.nmap
+	$NMAP -sn -iL $IPLIST --excludefile $EXCLUD -oG - | $AWK '/Up/{print $2}' | $TEE nmap/hosts.nmap
 }
 
 PortScan (){

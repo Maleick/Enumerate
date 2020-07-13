@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.2
+# Enumerate.sh Version: 1.21
 # Author: Maleick
 # Date: 7/13/20
 
@@ -53,25 +53,22 @@ echo
 echo "$green Enumerate Ports into Files $white"
 python $LIB/NmapParser.py
 echo
-echo "$green Enumerate CVE $white-$red BG $white"
-VulnerScan
-echo
-echo "$green Enumerate FTP $white-$red BG $white"
+echo "$green Enumerate FTP $white"
 EnumFTP
 echo
-echo "$green Enumerate Anonymous Shares $white-$red BG $white"
+echo "$green Enumerate Anonymous Shares $white"
 EnumCME
 echo
-echo "$green Enumerate SMB Signing False $white-$red BG $white"
+echo "$green Enumerate Signing False $white"
 GenListCME
 echo
-echo "$green Enumerate Metasploit $white-$red BG $white"
+echo "$green Enumerate Metasploit $white"
 EnumMSF
 echo
-echo "$green Enumerate Webs $white-$red BG $white"
+echo "$green Enumerate Webs $white"
 EnumAqua
-
-# Wait for jobs to complete
-wait
-
+echo
+echo "$green Enumerate CVE $white"
+VulnerScan
+echo
 echo "$red Enumerated!"

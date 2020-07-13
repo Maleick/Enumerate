@@ -31,24 +31,6 @@ run
 spool off
 
 setg threads 10
-spool logs/mssql_login.log
-use auxiliary/scanner/mssql/mssql_login
-set RHOSTS file:ports/1433
-
-set username sa
-set password sa
-run
-spool off
-
-setg threads 10
-spool logs/mssql_ping.log
-use auxiliary/scanner/mssql/mssql_ping
-set RHOSTS file:ports/1433
-
-run
-spool off
-
-setg threads 10
 spool logs/webdav_scanner.log
 use auxiliary/scanner/http/webdav_scanner
 set RHOSTS file:ports/80
@@ -113,50 +95,8 @@ run
 spool off
 
 setg threads 10
-spool logs/telnet_login.log
-use auxiliary/scanner/telnet/telnet_login
-set RHOSTS file:ports/23
-
-set username admin
-set password admin
-run
-set username root
-set password root
-run
-spool off
-
-setg threads 10
-spool logs/ssh_version.log
-use auxiliary/scanner/ssh/ssh_version
-set RHOSTS file:ports/22
-
-run
-spool off
-
-setg threads 10
-spool logs/ssh_login.log
-use auxiliary/scanner/ssh/ssh_login
-set RHOSTS file:ports/22
-
-set username admin
-set password admin
-run
-set username root
-set password root
-run
-spool off
-
-setg threads 10
 spool logs/ftpanonymous.log
 use auxiliary/scanner/ftp/anonymous
-set RHOSTS file:ports/21
-
-run
-spool off
-
-setg threads 10
-spool logs/ftp_version.log
-use auxiliary/scanner/ftp/ftp_version
 set RHOSTS file:ports/21
 
 run
@@ -174,14 +114,6 @@ setg threads 10
 spool logs/openssl_ccs.log
 use auxiliary/scanner/ssl/openssl_ccs
 set RHOSTS file:ports/443
-
-run
-spool off
-
-setg threads 10
-spool logs/postgres_login.log
-use auxiliary/scanner/postgres/postgres_login
-set RHOSTS file:ports/5432
 
 run
 spool off
