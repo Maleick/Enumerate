@@ -5,18 +5,10 @@ Enumerate all the things!
 
 ## Install
 
-You can install this via the command-line with either `curl` or `wget`.
-
-#### via curl
-
 ```shell
-sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/Maleick/Enumerate/master/install.sh)"
-```
-
-#### via wget
-
-```shell
-sudo sh -c "$(wget -O- https://raw.githubusercontent.com/Maleick/Enumerate/master/install.sh)"
+sudo git clone https://github.com/Maleick/Enumerate.git /opt/Enumerate
+cd /opt/Enumerate
+sudo ./install.sh
 ```
 
 ## Usage

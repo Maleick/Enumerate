@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-git clone https://github.com/Maleick/Enumerate.git /opt/Enumerate
-
 DIRPATH="/opt/Enumerate"
 EXEPATH="/opt/Enumerate/exe"
 
