@@ -64,6 +64,7 @@ EnumCME
 echo
 echo "$green Enumerate SMB Signing False $white-$red BG $white"
 GenListCME
+echo
 echo "$green Enumerate Metasploit $white-$red BG $white"
 EnumMSF
 echo
