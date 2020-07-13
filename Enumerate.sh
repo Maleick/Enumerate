@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.1
+# Enumerate.sh Version: 1.2
 # Author: Maleick
-# Date: 7/7/20
+# Date: 7/13/20
 
 cat << "EOF"                                                                 
 
@@ -18,6 +18,7 @@ $$$$$$$$\ $$ |  $$ |\$$$$$$  |$$ | $$ | $$ |\$$$$$$$\ $$ |     \$$$$$$$ | \$$$$ 
 EOF
 
 # Define Variables
+
 LIB='/opt/Enumerate/lib'
 EXE='/opt/Enumerate/exe'
 
@@ -40,17 +41,20 @@ else
 fi
 
 # Make Directories
-$MKDIR -p aquatone cme domain enumdom ftp logs ports
+$MKDIR -p aquatone cme ftp logs nmap ports
 
 # Call Functions
+echo "$green Enumerating Hosts $white"
+HostScan
+echo
 echo "$green Enumerating Ports $white"
 PortScan
 echo
-echo "$green Enumerate Port Files $white"
+echo "$green Enumerate Ports into Files $white"
 python $LIB/NmapParser.py
 echo
-echo "$green Enumerate Null Sessions $white-$red BG $white"
-EnumDomain
+echo "$green Enumerate CVE $white-$red BG $white"
+VulnerScan
 echo
 echo "$green Enumerate FTP $white-$red BG $white"
 EnumFTP
@@ -58,6 +62,8 @@ echo
 echo "$green Enumerate Anonymous Shares $white-$red BG $white"
 EnumCME
 echo
+echo "$green Enumerate SMB Signing False $white-$red BG $white"
+GenListCME
 echo "$green Enumerate Metasploit $white-$red BG $white"
 EnumMSF
 echo
