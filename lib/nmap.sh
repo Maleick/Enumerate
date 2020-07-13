@@ -11,3 +11,4 @@ PortScan (){
 VulnerScan (){
 	$NMAP -sV -iL nmap/hosts.nmap --script vulners --script-args mincvss=5.0 -oA nmap/vulners
 }
+

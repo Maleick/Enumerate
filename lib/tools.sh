@@ -9,3 +9,4 @@ declare -r MKDIR=`which mkdir`
 declare -r MSF=`which msfconsole`
 declare -r NMAP=`which nmap`
 declare -r TEE=`which tee`
+

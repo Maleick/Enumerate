@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.21
+# Enumerate.sh Version: 1.22
 # Author: Maleick
 # Date: 7/13/20
 

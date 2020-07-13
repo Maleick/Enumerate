@@ -6,3 +6,4 @@ EnumCME (){
 
 GenListCME (){
 	$CME smb ports/445 -u '' -p '' --gen-relay-list cme/signing.false
+}
