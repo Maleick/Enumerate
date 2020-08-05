@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.22
+# Enumerate.sh Version: 1.23
 # Author: Maleick
-# Date: 7/13/20
+# Date: 8/5/20
 
 cat << "EOF"                                                                 
 
@@ -46,29 +46,22 @@ $MKDIR -p aquatone cme ftp logs nmap ports
 # Call Functions
 echo "$green Enumerating Hosts $white"
 HostScan
-echo
 echo "$green Enumerating Ports $white"
 PortScan
-echo
 echo "$green Enumerate Ports into Files $white"
 python $LIB/NmapParser.py
-echo
 echo "$green Enumerate FTP $white"
 EnumFTP
-echo
 echo "$green Enumerate Anonymous Shares $white"
 EnumCME
-echo
 echo "$green Enumerate Signing False $white"
 GenListCME
-echo
 echo "$green Enumerate Metasploit $white"
 EnumMSF
-echo
 echo "$green Enumerate Webs $white"
 EnumAqua
-echo
+echo "$green Enumerate Metasploit $white"
+EgadzScan
 echo "$green Enumerate CVE $white"
 VulnerScan
-echo
 echo "$red Enumerated!"
