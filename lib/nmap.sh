@@ -5,7 +5,7 @@ HostScan (){
 }
 
 PortScan (){
-	$NMAP -sSUC -iL nmap/hosts.nmap -p $PORTS -oA nmap/ports
+	$NMAP -sSU -iL nmap/hosts.nmap -p $PORTS -oA nmap/ports
 }
 
 VulnerScan (){
