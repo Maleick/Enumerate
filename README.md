@@ -1,7 +1,7 @@
 Enumerate
 ======
 
-Enumerate all the things!
+Enumerate all the external things!
 
 ## Install
 
