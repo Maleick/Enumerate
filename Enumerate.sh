@@ -27,7 +27,6 @@ EXE='/opt/Enumerate/exe'
 . $LIB/ports.sh
 . $LIB/tools.sh
 . $LIB/nmap.sh
-. $LIB/cme.sh
 . $LIB/aquatone.sh
 . $LIB/misc.sh
 
@@ -52,16 +51,10 @@ echo "$green Enumerate Ports into Files $white"
 python $LIB/NmapParser.py
 echo "$green Enumerate FTP $white"
 EnumFTP
-echo "$green Enumerate Anonymous Shares $white"
-EnumCME
-echo "$green Enumerate Signing False $white"
-GenListCME
 echo "$green Enumerate Metasploit $white"
 EnumMSF
 echo "$green Enumerate Webs $white"
 EnumAqua
-echo "$green Enumerate Metasploit $white"
-EgadzScan
 echo "$green Enumerate CVE $white"
 VulnerScan
 echo "$red Enumerated!"
