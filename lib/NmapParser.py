@@ -10,7 +10,7 @@ ports_file = open('nmap/ports.gnmap').read().split('\n')
 
 for line in ports_file:
 	ip_address = line[line.find(":")+2:line.find("(")-1]
-	pattern = '([0-9]+)' + "/open/tcp"
+	pattern = '([0-9]+)' + "/open/"
 	find_pattern = re.findall(pattern, line)
 	if find_pattern:
 		for i in find_pattern:
