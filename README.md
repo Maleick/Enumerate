@@ -16,10 +16,9 @@ sudo ./install.sh
 Enumerate requires:
 - root privileges
 - list of IP addresses
-- list of IP exclusions even if it is an empty file
 
 ```shell
-sudo enumerate iplist.txt exclusions.txt
+sudo enumerate iplist.txt
 ```
 
 ## Depends

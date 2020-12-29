@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.23
+# Enumerate.sh Version: 1.0
+# External Branch
 # Author: Maleick
-# Date: 8/5/20
+# Date: 12/28/20
 
 cat << "EOF"                                                                 
 
@@ -32,19 +33,16 @@ EXE='/opt/Enumerate/exe'
 
 # Usage
 if [ $# -eq 0 ]; then
-	echo "$red Usage: $0 iplist.txt exclusions.txt"
+	echo "$red Usage: $0 iplist.txt"
 	exit 1
 else
 	IPLIST=$1
-	EXCLUD=$2
 fi
 
 # Make Directories
-$MKDIR -p aquatone cme ftp logs nmap ports
+$MKDIR -p aquatone ftp logs nmap ports
 
 # Call Functions
-echo "$green Enumerating Hosts $white"
-HostScan
 echo "$green Enumerating Ports $white"
 PortScan
 echo "$green Enumerate Ports into Files $white"
@@ -55,6 +53,4 @@ echo "$green Enumerate Metasploit $white"
 EnumMSF
 echo "$green Enumerate Webs $white"
 EnumAqua
-echo "$green Enumerate CVE $white"
-VulnerScan
 echo "$red Enumerated!"
