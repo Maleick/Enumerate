@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.23
+# Enumerate.sh Version: 1.3
 # Author: Maleick
-# Date: 8/5/20
+# Date: 12/29/20
 
 cat << "EOF"                                                                 
 
