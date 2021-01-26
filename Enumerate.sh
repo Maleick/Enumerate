@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Enumerate.sh Version: 1.3
+# Enumerate.sh 
+# Version: 1.4
 # Author: Maleick
-# Date: 12/29/20
+# Date: 01/25/21
 
 cat << "EOF"                                                                 
 
@@ -49,7 +50,7 @@ HostScan
 echo "$green Enumerating Ports $white"
 PortScan
 echo "$green Enumerate Ports into Files $white"
-python $LIB/NmapParser.py
+python2 $LIB/NmapParser.py
 echo "$green Enumerate FTP $white"
 EnumFTP
 echo "$green Enumerate Anonymous Shares $white"
@@ -60,8 +61,6 @@ echo "$green Enumerate Metasploit $white"
 EnumMSF
 echo "$green Enumerate Webs $white"
 EnumAqua
-echo "$green Enumerate Metasploit $white"
+echo "$green Enumerate Egress Ports $white"
 EgadzScan
-echo "$green Enumerate CVE $white"
-VulnerScan
 echo "$red Enumerated!"
