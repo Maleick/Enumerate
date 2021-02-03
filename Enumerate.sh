@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 #
 # Enumerate.sh 
-# Version: 1.4
+# Version: 1.5
 # Author: Maleick
-# Date: 01/25/21
+# Date: 02/02/21
 
 cat << "EOF"                                                                 
 
@@ -50,7 +50,7 @@ HostScan
 echo "$green Enumerating Ports $white"
 PortScan
 echo "$green Enumerate Ports into Files $white"
-python2 $LIB/NmapParser.py
+python3 $LIB/NmapParser.py
 echo "$green Enumerate FTP $white"
 EnumFTP
 echo "$green Enumerate Anonymous Shares $white"
