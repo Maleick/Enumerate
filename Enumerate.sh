@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 #
 # Enumerate.sh 
-# Version: 1.5
+# Version: 1.6
 # Author: Maleick
-# Date: 02/02/21
+# Date: 03/01/21
 
 cat << "EOF"                                                                 
 
@@ -53,14 +53,14 @@ echo "$green Enumerate Ports into Files $white"
 python3 $LIB/NmapParser.py
 echo "$green Enumerate FTP $white"
 EnumFTP
-echo "$green Enumerate Anonymous Shares $white"
-EnumCME
-echo "$green Enumerate Signing False $white"
-GenListCME
 echo "$green Enumerate Metasploit $white"
 EnumMSF
 echo "$green Enumerate Webs $white"
 EnumAqua
 echo "$green Enumerate Egress Ports $white"
 EgadzScan
+echo "$green Enumerate OS Type $white"
+EnumCME
+echo "$green Enumerate Signing False $white"
+GenListCME
 echo "$red Enumerated!"
