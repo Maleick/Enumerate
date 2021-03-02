@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 EnumCME (){
-	$CME smb ports/445 | $TEE cme/cme_anon
+	$CME smb ports/445 | $TEE cme/cme_enum
 }
 
 GenListCME (){
