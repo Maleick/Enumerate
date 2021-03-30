@@ -1,12 +1,4 @@
 setg threads 10
-spool logs/smb_version.log
-use auxiliary/scanner/smb/smb_version
-set RHOSTS file:ports/445
-
-run
-spool off
-
-setg threads 10
 spool logs/smb_ms17_010.log
 use auxiliary/scanner/smb/smb_ms17_010
 set RHOSTS file:ports/445
@@ -23,22 +15,6 @@ run
 spool off
 
 setg threads 10
-spool logs/smb_enumshares.log
-use auxiliary/scanner/smb/smb_enumshares
-set RHOSTS file:ports/445
-
-run
-spool off
-
-setg threads 10
-spool logs/webdav_scanner.log
-use auxiliary/scanner/http/webdav_scanner
-set RHOSTS file:ports/80
-
-run
-spool off
-
-setg threads 10
 spool logs/vnc_login.log
 use auxiliary/scanner/vnc/vnc_login
 set RHOSTS file:ports/5900
@@ -50,14 +26,6 @@ setg threads 10
 spool logs/vnc_none_auth.log
 use auxiliary/scanner/vnc/vnc_none_auth
 set RHOSTS file:ports/5900
-
-run
-spool off
-
-setg threads 10
-spool logs/ipmi_version.log
-use auxiliary/scanner/ipmi/ipmi_version
-set RHOSTS file:ports/623
 
 run
 spool off
@@ -87,33 +55,9 @@ run
 spool off
 
 setg threads 10
-spool logs/open_x11.log
-use auxiliary/scanner/x11/open_x11
-set RHOSTS file:ports/6000
-
-run
-spool off
-
-setg threads 10
 spool logs/ftpanonymous.log
 use auxiliary/scanner/ftp/anonymous
 set RHOSTS file:ports/21
-
-run
-spool off
-
-setg threads 10
-spool logs/openssl_heartbleed.log
-use auxiliary/scanner/ssl/openssl_heartbleed
-set RHOSTS file:ports/443
-
-run
-spool off
-
-setg threads 10
-spool logs/openssl_ccs.log
-use auxiliary/scanner/ssl/openssl_ccs
-set RHOSTS file:ports/443
 
 run
 spool off
