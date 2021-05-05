@@ -34,14 +34,7 @@ setg threads 10
 spool logs/ipmi_dumphashes.log
 use auxiliary/scanner/ipmi/ipmi_dumphashes
 set RHOSTS file:ports/623
-
-run
-spool off
-
-setg threads 10
-spool logs/ipmi_cipher_zero.log
-use auxiliary/scanner/ipmi/ipmi_cipher_zero
-set RHOSTS file:ports/623
+set output_hashcat_file logs/ipmi.hashes
 
 run
 spool off
