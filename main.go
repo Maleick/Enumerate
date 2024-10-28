@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	// Example dependency
 )
 
 // Download Aquatone zip file
