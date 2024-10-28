@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -153,8 +152,7 @@ func nmapLive(targetFile, excludeFile string) error {
 	}
 
 	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
-		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		err := ioutil.WriteFile(excludeFile, []byte{}, 0644)
+		err := os.WriteFile(excludeFile, []byte{}, 0644)
 		if err != nil {
 			return fmt.Errorf("unable to create exclusion file: %v", err)
 		}
@@ -185,7 +183,7 @@ func scanPorts(targetFile, excludeFile string) error {
 
 	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
 		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		err := ioutil.WriteFile(excludeFile, []byte{}, 0644)
+		err := os.WriteFile(excludeFile, []byte{}, 0644)
 		if err != nil {
 			return fmt.Errorf("unable to create exclusion file: %v", err)
 		}
@@ -223,9 +221,9 @@ func parseNmapOutput(nmapXMLFile string) error {
 	if err != nil {
 		return fmt.Errorf("unable to open Nmap XML file: %v", err)
 	}
-	defer xmlFile.Close()
-
-	byteValue, _ := ioutil.ReadAll(xmlFile)
+	byteValue, _ := io.ReadAll(xmlFile)
+	byteValue, _ = io.ReadAll(xmlFile)
+	byteValue, _ = io.ReadAll(xmlFile)
 	var nmapRun NmapRun
 	err = xml.Unmarshal(byteValue, &nmapRun)
 	if err != nil {
@@ -447,7 +445,7 @@ func runEnum4linux(concurrencyLimit int) {
 			if err != nil {
 				log.Printf("[ERROR] Enum4Linux failed for %s: %v\nOutput: %s", ip, err, string(output))
 			} else {
-				err = ioutil.WriteFile(outputFile, output, 0644)
+				err = os.WriteFile(outputFile, output, 0644)
 				if err != nil {
 					log.Printf("[ERROR] Unable to write Enum4Linux output for %s: %v", ip, err)
 				}
@@ -503,7 +501,7 @@ func runNikto(concurrencyLimit int) {
 			if err != nil {
 				log.Printf("[ERROR] Nikto scan failed for %s: %v\nOutput: %s", ip, err, string(output))
 			} else {
-				err = ioutil.WriteFile(outputFile, output, 0644)
+				err = os.WriteFile(outputFile, output, 0644)
 				if err != nil {
 					log.Printf("[ERROR] Unable to write Nikto output for %s: %v", ip, err)
 				}
