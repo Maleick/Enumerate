@@ -1,4 +1,4 @@
-// Enumerate v1.0.1 - Penetration Testing Enumeration Script
+// Enumerate v1.0.2 - Penetration Testing Enumeration Script
 // Developed by Maleick
 // Rewritten in Go
 
@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -59,35 +58,61 @@ Options:
   --telnet-login      : Attempt Telnet login on detected hosts
   --ipmi-scan         : Enumerate IPMI services
   --all               : Run all the above scripts sequentially
-  --help, -h          : Show this help menu
-    `
+`
 	fmt.Println(helpText)
 }
 
-// Function to Run Live Host Discovery with Nmap
-func nmapLive(targetFile, excludeFile string) {
-	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
-		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		os.Create(excludeFile)
+// Function to run a command and handle errors
+func runCommand(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+// Function to create a file if it does not exist
+func createFileIfNotExists(filename string) error {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", filename)
+		_, err := os.Create(filename)
+		return err
 	}
-	proceed := getUserInput("[PROMPT] Proceed with the scan using the provided files? (yes/no): ")
-	if strings.ToLower(proceed) != "yes" {
-		fmt.Println("[INFO] Scan aborted by user.")
+	return nil
+}
+
+// Function to get user input
+func getUserInput(prompt string) string {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(prompt)
+	input, _ := reader.ReadString('\n')
+	return strings.TrimSpace(input)
+}
+
+// Function to run Nmap for live host discovery
+func nmapLive(targetFile, excludeFile string) {
+	fmt.Println("\n[INFO] Running Nmap for live host discovery...")
+
+	if err := createFileIfNotExists(excludeFile); err != nil {
+		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
 		return
 	}
 
-	fmt.Println("\n[INFO] Running Nmap for live host discovery...")
-	cmd := exec.Command("nmap", "-sn", "-iL", targetFile, "--excludefile", excludeFile, "-oA", "nmap/live_hosts")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
+	proceed := getUserInput("[PROMPT] Proceed with live host discovery using the provided files? (yes/no): ")
+	if strings.ToLower(proceed) != "yes" {
+		fmt.Println("[INFO] Live host discovery aborted by user.")
+		return
+	}
+
+	if err := runCommand("nmap", "-sn", "-iL", targetFile, "--excludefile", excludeFile, "-oA", "nmap/live_hosts"); err != nil {
+		fmt.Printf("[ERROR] Failed to run Nmap: %v\n", err)
+	}
 }
 
 // Function to Scan Specific Ports with Nmap (e.g., Aquatone Ports)
 func scanPorts(targetFile, excludeFile string) {
-	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
-		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		os.Create(excludeFile)
+	if err := createFileIfNotExists(excludeFile); err != nil {
+		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
+		return
 	}
 	proceed := getUserInput("[PROMPT] Proceed with the port scan using the provided files? (yes/no): ")
 	if strings.ToLower(proceed) != "yes" {
@@ -118,8 +143,13 @@ func parseNmapOutput(nmapXMLFile string) {
 	defer xmlFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(xmlFile)
+
 	var nmapRun NmapRun
-	xml.Unmarshal(byteValue, &nmapRun)
+	err = xml.Unmarshal(byteValue, &nmapRun)
+	if err != nil {
+		fmt.Println("Error unmarshalling XML:", err)
+		return
+	}
 
 	portsDir := "ports"
 	if _, err := os.Stat(portsDir); os.IsNotExist(err) {
@@ -134,7 +164,7 @@ func parseNmapOutput(nmapXMLFile string) {
 			if port.State.State != "open" {
 				continue
 			}
-			portNumber := port.PortID
+			portNumber := port.PortID // port.PortID is already a string
 			portFile := filepath.Join(portsDir, portNumber)
 			if _, exists := portFiles[portFile]; !exists {
 				f, _ := os.OpenFile(portFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -151,8 +181,7 @@ func parseNmapOutput(nmapXMLFile string) {
 
 // Nmap XML Structs
 type NmapRun struct {
-	XMLName xml.Name `xml:"nmaprun"`
-	Hosts   []Host   `xml:"host"`
+	Hosts []Host `xml:"host"`
 }
 
 type Host struct {
@@ -169,8 +198,9 @@ type Ports struct {
 }
 
 type Port struct {
-	PortID string `xml:"portid,attr"`
-	State  State  `xml:"state"`
+	Protocol string `xml:"protocol,attr"`
+	PortID   string `xml:"portid,attr"`
+	State    State  `xml:"state"`
 }
 
 type State struct {
@@ -202,7 +232,9 @@ func metasploitModules() {
 		}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "[ERROR] Failed to run module %s: %v\n", module, err)
+		}
 	}
 }
 
@@ -222,7 +254,11 @@ func runEnum4linux() {
 		fmt.Println("[WARNING] No hosts with port 445 open found.")
 		return
 	}
-	ips := readLines("ports/445")
+	ips, err := readLines("ports/445")
+	if err != nil {
+		fmt.Printf("[ERROR] Failed to read ports/445: %v\n", err)
+		return
+	}
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/enum4linux_%s.log", ip)
 		cmd := exec.Command("enum4linux", "-a", ip)
@@ -246,9 +282,9 @@ func runNetexec() {
 
 // Function to Run Nmap with Vulners Script
 func vulnersScan(targetFile, excludeFile string) {
-	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
-		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		os.Create(excludeFile)
+	if err := createFileIfNotExists(excludeFile); err != nil {
+		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
+		return
 	}
 	proceed := getUserInput("[PROMPT] Proceed with the Vulners scan using the provided files? (yes/no): ")
 	if strings.ToLower(proceed) != "yes" {
@@ -265,9 +301,9 @@ func vulnersScan(targetFile, excludeFile string) {
 
 // Function to Run Nmap with 'vuln' Scripts
 func nmapVulnScan(targetFile, excludeFile string) {
-	if _, err := os.Stat(excludeFile); os.IsNotExist(err) {
-		fmt.Printf("[WARNING] Exclusion file '%s' not found. Creating an empty exclusion file.\n", excludeFile)
-		os.Create(excludeFile)
+	if err := createFileIfNotExists(excludeFile); err != nil {
+		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
+		return
 	}
 	proceed := getUserInput("[PROMPT] Proceed with the Nmap 'vuln' scripts scan using the provided files? (yes/no): ")
 	if strings.ToLower(proceed) != "yes" {
@@ -296,7 +332,10 @@ func nmapServiceScan() {
 
 	for _, portFile := range portFiles {
 		port := portFile.Name()
-		ips := readLines(filepath.Join(portsDir, port))
+		ips, err := readLines(filepath.Join(portsDir, port))
+		if err != nil {
+			continue
+		}
 		for _, ip := range ips {
 			var nmapScripts []string
 			switch port {
@@ -341,7 +380,10 @@ func runNikto() {
 	for _, port := range webPorts {
 		portFile := filepath.Join("ports", port)
 		if _, err := os.Stat(portFile); err == nil {
-			lines := readLines(portFile)
+			lines, err := readLines(portFile)
+			if err != nil {
+				continue
+			}
 			for _, line := range lines {
 				ips[line] = true
 			}
@@ -366,7 +408,11 @@ func checkFTPAnonymous() {
 		fmt.Println("[WARNING] No hosts with port 21 open found.")
 		return
 	}
-	ips := readLines("ports/21")
+	ips, err := readLines("ports/21")
+	if err != nil {
+		fmt.Printf("[ERROR] Failed to read ports/21: %v\n", err)
+		return
+	}
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/ftp_anonymous_%s.log", ip)
 		cmd := exec.Command("nmap", "-p", "21", "--script", "ftp-anon", ip, "-oN", outputFile)
@@ -383,7 +429,11 @@ func snmpEnum() {
 		fmt.Println("[WARNING] No hosts with port 161 open found.")
 		return
 	}
-	ips := readLines("ports/161")
+	ips, err := readLines("ports/161")
+	if err != nil {
+		fmt.Printf("[ERROR] Failed to read ports/161: %v\n", err)
+		return
+	}
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/snmpwalk_%s.log", ip)
 		cmd := exec.Command("snmpwalk", "-v1", "-c", "public", ip)
@@ -403,7 +453,10 @@ func checkOpenDatabases() {
 	for port, dbName := range dbPorts {
 		portFile := filepath.Join("ports", port)
 		if _, err := os.Stat(portFile); err == nil {
-			ips := readLines(portFile)
+			ips, err := readLines(portFile)
+			if err != nil {
+				continue
+			}
 			for _, ip := range ips {
 				outputFile := fmt.Sprintf("logs/%s_%s.log", dbName, ip)
 				var cmd *exec.Cmd
@@ -429,7 +482,10 @@ func nmapSSLScan() {
 	for _, port := range sslPorts {
 		portFile := filepath.Join("ports", port)
 		if _, err := os.Stat(portFile); err == nil {
-			ips := readLines(portFile)
+			ips, err := readLines(portFile)
+			if err != nil {
+				continue
+			}
 			for _, ip := range ips {
 				outputFile := fmt.Sprintf("logs/nmap_ssl_%s_%s.log", ip, port)
 				cmd := exec.Command("nmap", "-sV", "-p", port, "--script", "ssl-enum-ciphers,ssl-cert,ssl-dh-params", ip, "-oN", outputFile)
@@ -449,7 +505,10 @@ func defaultCredentialsCheck() {
 	for _, port := range webPorts {
 		portFile := filepath.Join("ports", port)
 		if _, err := os.Stat(portFile); err == nil {
-			lines := readLines(portFile)
+			lines, err := readLines(portFile)
+			if err != nil {
+				continue
+			}
 			for _, line := range lines {
 				ips[line] = true
 			}
@@ -479,7 +538,11 @@ func sshLogin() {
 		fmt.Println("[WARNING] No hosts with port 22 open found.")
 		return
 	}
-	ips := readLines("ports/22")
+	ips, err := readLines("ports/22")
+	if err != nil {
+		fmt.Printf("[ERROR] Failed to read ports/22: %v\n", err)
+		return
+	}
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/ssh_login_%s.log", ip)
 		cmd := exec.Command("sshpass", "-p", "password", "ssh", "-o", "StrictHostKeyChecking=no", fmt.Sprintf("root@%s", ip))
@@ -495,7 +558,11 @@ func telnetLogin() {
 		fmt.Println("[WARNING] No hosts with port 23 open found.")
 		return
 	}
-	ips := readLines("ports/23")
+	ips, err := readLines("ports/23")
+	if err != nil {
+		fmt.Printf("[ERROR] Failed to read ports/23: %v\n", err)
+		return
+	}
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/telnet_login_%s.log", ip)
 		cmd := exec.Command("telnet", ip)
@@ -511,27 +578,31 @@ func ipmiScan() {
 		fmt.Println("[WARNING] No hosts with port 623 open found.")
 		return
 	}
-	ips := readLines("ports/623")
+
+	ips, err := readLines("ports/623")
+	if err != nil {
+		log.Fatalf("Failed to read IPs: %v\n", err)
+	}
+
 	for _, ip := range ips {
 		outputFile := fmt.Sprintf("logs/ipmi_scan_%s.log", ip)
 		cmd := exec.Command("ipmitool", "-I", "lanplus", "-H", ip, "-U", "admin", "-P", "password", "chassis", "status")
-		output, _ := cmd.CombinedOutput()
-		ioutil.WriteFile(outputFile, output, 0644)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("Failed to run ipmitool for IP %s: %v\n", ip, err)
+			continue
+		}
+		if err := ioutil.WriteFile(outputFile, output, 0644); err != nil {
+			log.Printf("Failed to write output for IP %s: %v\n", ip, err)
+		}
 	}
 }
 
 // Helper Functions
-func getUserInput(prompt string) string {
-	fmt.Print(prompt)
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	return strings.TrimSpace(input)
-}
-
-func readLines(path string) []string {
-	file, err := os.Open(path)
+func readLines(filename string) ([]string, error) {
+	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatalf("readLines: %s", err)
+		return nil, err
 	}
 	defer file.Close()
 
@@ -540,21 +611,11 @@ func readLines(path string) []string {
 	for scanner.Scan() {
 		lines = append(lines, strings.TrimSpace(scanner.Text()))
 	}
-	return lines
+	return lines, scanner.Err()
 }
 
-// isExcluded checks if a CIDR is in the exclusions list
-func isExcluded(cidr string, exclusions []string) bool {
-	for _, exclusion := range exclusions {
-		if exclusion == cidr {
-			return true
-		}
-	}
-	return false
-}
-
-// Main Function
 func main() {
+	// Define flags
 	nmapLiveFlag := flag.Bool("nmap-live", false, "Run a live host discovery with Nmap")
 	scanPortsFlag := flag.Bool("scan-ports", false, "Scan specific ports with Nmap")
 	metasploitFlag := flag.Bool("metasploit", false, "Run selected Metasploit auxiliary modules for open ports")
@@ -572,34 +633,61 @@ func main() {
 	defaultCredsFlag := flag.Bool("default-creds", false, "Check for default credentials on services")
 	sshLoginFlag := flag.Bool("ssh-login", false, "Attempt SSH login on detected hosts")
 	telnetLoginFlag := flag.Bool("telnet-login", false, "Attempt Telnet login on detected hosts")
-	allFlag := flag.Bool("all", false, "Run all the above scripts sequentially")
 	ipmiScanFlag := flag.Bool("ipmi-scan", false, "Enumerate IPMI services")
+	allFlag := flag.Bool("all", false, "Run all the above scripts sequentially")
 	targetFile := flag.String("target-file", "", "Path to the file containing target IP addresses or CIDRs")
 	excludeFile := flag.String("exclude-file", "excluded_hosts.txt", "Path to the file containing IP addresses to exclude from the scan")
 	helpFlag := flag.Bool("help", false, "Show this help menu")
 	hFlag := flag.Bool("h", false, "Show this help menu")
 
+	// Parse flags
 	flag.Parse()
 
+	// Display help if needed
 	if *helpFlag || *hFlag {
 		displayHelp()
 		return
 	}
 
+	// Display banner
 	displayBanner()
 
+	// Create necessary directories
 	if _, err := os.Stat("logs"); os.IsNotExist(err) {
 		os.Mkdir("logs", 0755)
 	}
-	if *nmapLiveFlag || *allFlag {
-		nmapLive(*targetFile, *excludeFile)
+	if _, err := os.Stat("nmap"); os.IsNotExist(err) {
+		os.Mkdir("nmap", 0755)
+	}
+	if _, err := os.Stat("ports"); os.IsNotExist(err) {
+		os.Mkdir("ports", 0755)
 	}
 
-	if *nmapLiveFlag {
-		if *targetFile == "" {
-			fmt.Println("[ERROR] --target-file is required for --nmap-live")
-			return
-		}
+	// Check if any action flags are set
+	actionFlagsSet := *nmapLiveFlag || *scanPortsFlag || *metasploitFlag || *aquatoneFlag || *enum4linuxFlag || *netexecFlag ||
+		*vulnersScanFlag || *nmapVulnScanFlag || *nmapServiceScanFlag || *niktoFlag || *ftpAnonFlag ||
+		*snmpEnumFlag || *sslTLSChecksFlag || *openDatabasesFlag || *defaultCredsFlag || *sshLoginFlag ||
+		*telnetLoginFlag || *ipmiScanFlag || *allFlag
+
+	if !actionFlagsSet {
+		displayHelp()
+		return
+	}
+
+	// Check required parameters
+	if (*nmapLiveFlag || *scanPortsFlag || *vulnersScanFlag || *nmapVulnScanFlag || *allFlag) && *targetFile == "" {
+		fmt.Println("[ERROR] --target-file is required for this operation")
+		return
+	}
+
+	// Create exclude file if not exists
+	if err := createFileIfNotExists(*excludeFile); err != nil {
+		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
+		return
+	}
+
+	// Run actions
+	if *nmapLiveFlag || *allFlag {
 		nmapLive(*targetFile, *excludeFile)
 	}
 
@@ -607,19 +695,7 @@ func main() {
 		scanPorts(*targetFile, *excludeFile)
 	}
 
-	if *scanPortsFlag {
-		if *targetFile == "" {
-			fmt.Println("[ERROR] --target-file is required for --scan-ports")
-			return
-		}
-		scanPorts(*targetFile, *excludeFile)
-	}
-
 	if *metasploitFlag || *allFlag {
-		metasploitModules()
-	}
-
-	if *metasploitFlag {
 		metasploitModules()
 	}
 
@@ -627,15 +703,7 @@ func main() {
 		runAquatone()
 	}
 
-	if *aquatoneFlag {
-		runAquatone()
-	}
-
 	if *enum4linuxFlag || *allFlag {
-		runEnum4linux()
-	}
-
-	if *enum4linuxFlag {
 		runEnum4linux()
 	}
 
@@ -643,23 +711,7 @@ func main() {
 		runNetexec()
 	}
 
-	if *netexecFlag {
-		runNetexec()
-	}
-
 	if *vulnersScanFlag || *allFlag {
-		if *targetFile == "" {
-			fmt.Println("[ERROR] --target-file is required for --vulners-scan")
-			return
-		}
-		vulnersScan(*targetFile, *excludeFile)
-	}
-
-	if *vulnersScanFlag {
-		if *targetFile == "" {
-			fmt.Println("[ERROR] --target-file is required for --vulners-scan")
-			return
-		}
 		vulnersScan(*targetFile, *excludeFile)
 	}
 
@@ -667,19 +719,7 @@ func main() {
 		nmapVulnScan(*targetFile, *excludeFile)
 	}
 
-	if *nmapVulnScanFlag {
-		if *targetFile == "" {
-			fmt.Println("[ERROR] --target-file is required for --nmap-vuln-scan")
-			return
-		}
-		nmapVulnScan(*targetFile, *excludeFile)
-	}
-
 	if *nmapServiceScanFlag || *allFlag {
-		nmapServiceScan()
-	}
-
-	if *nmapServiceScanFlag {
 		nmapServiceScan()
 	}
 
@@ -687,15 +727,7 @@ func main() {
 		runNikto()
 	}
 
-	if *niktoFlag {
-		runNikto()
-	}
-
 	if *ftpAnonFlag || *allFlag {
-		checkFTPAnonymous()
-	}
-
-	if *ftpAnonFlag {
 		checkFTPAnonymous()
 	}
 
@@ -703,15 +735,7 @@ func main() {
 		snmpEnum()
 	}
 
-	if *snmpEnumFlag {
-		snmpEnum()
-	}
-
 	if *sslTLSChecksFlag || *allFlag {
-		nmapSSLScan()
-	}
-
-	if *sslTLSChecksFlag {
 		nmapSSLScan()
 	}
 
@@ -719,15 +743,7 @@ func main() {
 		checkOpenDatabases()
 	}
 
-	if *openDatabasesFlag {
-		checkOpenDatabases()
-	}
-
 	if *defaultCredsFlag || *allFlag {
-		defaultCredentialsCheck()
-	}
-
-	if *defaultCredsFlag {
 		defaultCredentialsCheck()
 	}
 
@@ -735,49 +751,11 @@ func main() {
 		sshLogin()
 	}
 
-	if *sshLoginFlag {
-		sshLogin()
-		if *ipmiScanFlag || *allFlag {
-			ipmiScan()
-		}
-
-		// Process CIDR ranges and exclusions if targetFile and excludeFile are provided
-		if *targetFile != "" && *excludeFile != "" {
-			cidrRanges := readLines(*targetFile)
-			exclusions := readLines(*excludeFile)
-
-			for _, cidr := range cidrRanges {
-				if _, _, err := net.ParseCIDR(cidr); err != nil {
-					log.Printf("Invalid CIDR: %s\n", cidr)
-					continue
-				}
-				if isExcluded(cidr, exclusions) {
-					log.Printf("Excluded CIDR: %s\n", cidr)
-					continue
-				}
-				fmt.Printf("Scanning CIDR: %s\n", cidr)
-				// Add your scanning logic here
-			}
-		}
-		telnetLogin()
-	}
-
-	if *telnetLoginFlag {
+	if *telnetLoginFlag || *allFlag {
 		telnetLogin()
 	}
 
 	if *ipmiScanFlag || *allFlag {
 		ipmiScan()
-	}
-
-	if *ipmiScanFlag {
-		ipmiScan()
-	}
-
-	if !*nmapLiveFlag && !*scanPortsFlag && !*metasploitFlag && !*aquatoneFlag && !*enum4linuxFlag && !*netexecFlag &&
-		!*vulnersScanFlag && !*nmapVulnScanFlag && !*nmapServiceScanFlag && !*niktoFlag && !*ftpAnonFlag &&
-		!*snmpEnumFlag && !*sslTLSChecksFlag && !*openDatabasesFlag && !*defaultCredsFlag && !*sshLoginFlag &&
-		!*telnetLoginFlag && !*ipmiScanFlag {
-		displayHelp()
 	}
 }
