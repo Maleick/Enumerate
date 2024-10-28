@@ -1,9 +1,11 @@
-Enumerate
-======
+```markdown
+# Enumerate
 
 Enumerate all the things!
 
 ## Install
+
+To install Enumerate, clone the repository and build the binary:
 
 ```shell
 sudo git clone https://github.com/Maleick/Enumerate.git /opt/Enumerate
@@ -11,22 +13,28 @@ cd /opt/Enumerate
 go build -o enumerate
 ```
 
+Ensure you have [Go](https://golang.org/doc/install) installed on your system.
+
 ## Usage
 
 Enumerate requires:
-- root privileges
-- list of IP addresses
-- list of IP exclusions even if it is an empty file
+- Root privileges
+- A list of IP addresses
+- A list of IP exclusions, even if it is an empty file
+
+To run Enumerate, use the following command:
 
 ```shell
 sudo enumerate iplist.txt exclusions.txt
 ```
 
-## Depends
+## Dependencies
 
 Enumerate depends on the following binaries:
 
-- https://github.com/michenriksen/aquatone
+- [Aquatone](https://github.com/michenriksen/aquatone)
+
+Ensure that you have these dependencies installed and available in your `$PATH`.
 
 ## Modules
 
@@ -63,6 +71,6 @@ This project is written in Go. To build the project, run:
 ```shell
 go build -o enumerate
 ```
-```
 
-This update includes the new modules and mentions that the project is written in Go.
+For development, ensure you have Go installed and set up your environment accordingly. You can refer to the [Go documentation](https://golang.org/doc/) for more details.
+```
