@@ -71,6 +71,4 @@ This project is written in Go. To build the project, run:
 ```shell
 go build -o enumerate
 ```
-
 For development, ensure you have Go installed and set up your environment accordingly. You can refer to the [Go documentation](https://golang.org/doc/) for more details.
-```
