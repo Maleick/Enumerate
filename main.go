@@ -1,4 +1,4 @@
-// Enumerate v1.0.2 - Penetration Testing Enumeration Script
+// Enumerate v1.0.3 - Penetration Testing Enumeration Script
 // Developed by Maleick
 // Rewritten in Go
 
@@ -29,14 +29,22 @@ $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$   ____|$$ |     $$  __$$ | $$ |$$
 $$$$$$$$\ $$ |  $$ |\$$$$$$  |$$ | $$ | $$ |\$$$$$$$\ $$ |     \$$$$$$$ | \$$$$  |\$$$$$$$\ 
 \________|\__|  \__| \______/ \__| \__| \__| \_______|\__|      \_______|  \____/  \_______|
                                                                                               
-    `
+	`
 	fmt.Println(banner)
 }
 
-// Help Menu
+// Help Menu with Usage Examples
 func displayHelp() {
 	helpText := `
-Usage: ./enumerate [options]
+Usage:
+  go run enumerate.go [OPTIONS]
+
+Examples:
+  # Run a live host discovery using ips.txt and exclude ips in exclusions.txt
+  go run enumerate.go --nmap-live --target-file ips.txt --exclude-file exclusions.txt
+
+  # Run all scans
+  go run enumerate.go --all --target-file ips.txt --exclude-file exclusions.txt
 
 Options:
   --nmap-live         : Run a live host discovery with Nmap
@@ -58,6 +66,16 @@ Options:
   --telnet-login      : Attempt Telnet login on detected hosts
   --ipmi-scan         : Enumerate IPMI services
   --all               : Run all the above scripts sequentially
+
+Additional Parameters:
+  --target-file       : Path to the file containing target IP addresses or CIDRs (e.g., ips.txt)
+  --exclude-file      : Path to the file containing IP addresses to exclude from the scan (e.g., exclusions.txt)
+
+Notes:
+  - The 'ips.txt' file should contain one IP address or CIDR per line.
+  - The 'exclusions.txt' file should contain IP addresses to exclude, one per line.
+  - Ensure that the 'ips.txt' and 'exclusions.txt' files are in the same directory as the script or provide full paths.
+
 `
 	fmt.Println(helpText)
 }
@@ -80,26 +98,12 @@ func createFileIfNotExists(filename string) error {
 	return nil
 }
 
-// Function to get user input
-func getUserInput(prompt string) string {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(prompt)
-	input, _ := reader.ReadString('\n')
-	return strings.TrimSpace(input)
-}
-
 // Function to run Nmap for live host discovery
 func nmapLive(targetFile, excludeFile string) {
 	fmt.Println("\n[INFO] Running Nmap for live host discovery...")
 
 	if err := createFileIfNotExists(excludeFile); err != nil {
 		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
-		return
-	}
-
-	proceed := getUserInput("[PROMPT] Proceed with live host discovery using the provided files? (yes/no): ")
-	if strings.ToLower(proceed) != "yes" {
-		fmt.Println("[INFO] Live host discovery aborted by user.")
 		return
 	}
 
@@ -112,11 +116,6 @@ func nmapLive(targetFile, excludeFile string) {
 func scanPorts(targetFile, excludeFile string) {
 	if err := createFileIfNotExists(excludeFile); err != nil {
 		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
-		return
-	}
-	proceed := getUserInput("[PROMPT] Proceed with the port scan using the provided files? (yes/no): ")
-	if strings.ToLower(proceed) != "yes" {
-		fmt.Println("[INFO] Port scan aborted by user.")
 		return
 	}
 
@@ -286,11 +285,6 @@ func vulnersScan(targetFile, excludeFile string) {
 		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
 		return
 	}
-	proceed := getUserInput("[PROMPT] Proceed with the Vulners scan using the provided files? (yes/no): ")
-	if strings.ToLower(proceed) != "yes" {
-		fmt.Println("[INFO] Vulners scan aborted by user.")
-		return
-	}
 
 	fmt.Println("\n[INFO] Running Nmap with Vulners script for vulnerability detection...")
 	cmd := exec.Command("nmap", "-sV", "--script", "vulners", "-iL", targetFile, "--excludefile", excludeFile, "-oA", "nmap/vulners_scan")
@@ -303,11 +297,6 @@ func vulnersScan(targetFile, excludeFile string) {
 func nmapVulnScan(targetFile, excludeFile string) {
 	if err := createFileIfNotExists(excludeFile); err != nil {
 		fmt.Printf("[ERROR] Failed to create exclude file: %v\n", err)
-		return
-	}
-	proceed := getUserInput("[PROMPT] Proceed with the Nmap 'vuln' scripts scan using the provided files? (yes/no): ")
-	if strings.ToLower(proceed) != "yes" {
-		fmt.Println("[INFO] Nmap 'vuln' scripts scan aborted by user.")
 		return
 	}
 
@@ -519,10 +508,6 @@ func defaultCredentialsCheck() {
 		return
 	}
 	for ip := range ips {
-		proceed := getUserInput(fmt.Sprintf("[PROMPT] Proceed with default credential check on %s? (yes/no): ", ip))
-		if strings.ToLower(proceed) != "yes" {
-			continue
-		}
 		outputFile := fmt.Sprintf("logs/nmap_default_creds_%s.log", ip)
 		cmd := exec.Command("nmap", "-p", "80,443", "--script", "http-default-accounts", ip, "-oN", outputFile)
 		cmd.Stdout = os.Stdout
@@ -636,7 +621,7 @@ func main() {
 	ipmiScanFlag := flag.Bool("ipmi-scan", false, "Enumerate IPMI services")
 	allFlag := flag.Bool("all", false, "Run all the above scripts sequentially")
 	targetFile := flag.String("target-file", "", "Path to the file containing target IP addresses or CIDRs")
-	excludeFile := flag.String("exclude-file", "excluded_hosts.txt", "Path to the file containing IP addresses to exclude from the scan")
+	excludeFile := flag.String("exclude-file", "exclusions.txt", "Path to the file containing IP addresses to exclude from the scan")
 	helpFlag := flag.Bool("help", false, "Show this help menu")
 	hFlag := flag.Bool("h", false, "Show this help menu")
 
