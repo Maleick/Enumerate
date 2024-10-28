@@ -1,5 +1,5 @@
-// Enumerate v1.0.0 - Penetration Testing Enumeration Script
-// Developed by Michael Miles (Improved by OpenAI Assistant)
+// Enumerate v1.0.1 - Penetration Testing Enumeration Script
+// Developed by Maleick
 // Rewritten in Go
 
 package main
