@@ -43,6 +43,9 @@ Examples:
   # Run a live host discovery using ips.txt and exclude ips in exclusions.txt
   go run enumerate.go --nmap-live --target-file ips.txt --exclude-file exclusions.txt
 
+  # Run a live host discovery with router handling
+  go run enumerate.go --nmap-live --target-file ips.txt --exclude-file exclusions.txt --router-handling
+
   # Run all scans
   go run enumerate.go --all --target-file ips.txt --exclude-file exclusions.txt
 
@@ -70,6 +73,7 @@ Options:
 Additional Parameters:
   --target-file       : Path to the file containing target IP addresses or CIDRs (e.g., ips.txt)
   --exclude-file      : Path to the file containing IP addresses to exclude from the scan (e.g., exclusions.txt)
+  --router-handling   : Include logic to handle routers that reply to everything as up
 
 Notes:
   - The 'ips.txt' file should contain one IP address or CIDR per line.
@@ -81,7 +85,7 @@ Notes:
 }
 
 // Function to run a command and handle errors
-func runCommand(name string, args ...string) error {
+func executeCommand(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -107,7 +111,7 @@ func nmapLive(targetFile, excludeFile string) {
 		return
 	}
 
-	if err := runCommand("nmap", "-sn", "-iL", targetFile, "--excludefile", excludeFile, "-oA", "nmap/live_hosts"); err != nil {
+	if err := executeCommand("nmap", "-sn", "-iL", targetFile, "--excludefile", excludeFile, "-oA", "nmap/live_hosts"); err != nil {
 		fmt.Printf("[ERROR] Failed to run Nmap: %v\n", err)
 	}
 }
