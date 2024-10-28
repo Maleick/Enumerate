@@ -1,4 +1,4 @@
-// Enumerate v2.5 - Penetration Testing Enumeration Script
+// Enumerate v1.0.0 - Penetration Testing Enumeration Script
 // Developed by Michael Miles (Improved by OpenAI Assistant)
 // Rewritten in Go
 
@@ -57,6 +57,7 @@ Options:
   --ssh-login         : Attempt SSH login on detected hosts
   --telnet-login      : Attempt Telnet login on detected hosts
   --ipmi-scan         : Enumerate IPMI services
+  --all               : Run all the above scripts sequentially
   --help, -h          : Show this help menu
     `
 	fmt.Println(helpText)
@@ -560,7 +561,8 @@ func main() {
 	defaultCredsFlag := flag.Bool("default-creds", false, "Check for default credentials on services")
 	sshLoginFlag := flag.Bool("ssh-login", false, "Attempt SSH login on detected hosts")
 	telnetLoginFlag := flag.Bool("telnet-login", false, "Attempt Telnet login on detected hosts")
-	ipmiScanFlag := flag.Bool("ipmi-scan", false, "Enumerate IPMI services on detected hosts")
+	allFlag := flag.Bool("all", false, "Run all the above scripts sequentially")
+	ipmiScanFlag := flag.Bool("ipmi-scan", false, "Enumerate IPMI services")
 	targetFile := flag.String("target-file", "", "Path to the file containing target IP addresses or CIDRs")
 	excludeFile := flag.String("exclude-file", "excluded_hosts.txt", "Path to the file containing IP addresses to exclude from the scan")
 	helpFlag := flag.Bool("help", false, "Show this help menu")
@@ -578,6 +580,9 @@ func main() {
 	if _, err := os.Stat("logs"); os.IsNotExist(err) {
 		os.Mkdir("logs", 0755)
 	}
+	if *nmapLiveFlag || *allFlag {
+		nmapLive(*targetFile, *excludeFile)
+	}
 
 	if *nmapLiveFlag {
 		if *targetFile == "" {
@@ -586,6 +591,11 @@ func main() {
 		}
 		nmapLive(*targetFile, *excludeFile)
 	}
+
+	if *scanPortsFlag || *allFlag {
+		scanPorts(*targetFile, *excludeFile)
+	}
+
 	if *scanPortsFlag {
 		if *targetFile == "" {
 			fmt.Println("[ERROR] --target-file is required for --scan-ports")
@@ -593,18 +603,47 @@ func main() {
 		}
 		scanPorts(*targetFile, *excludeFile)
 	}
+
+	if *metasploitFlag || *allFlag {
+		metasploitModules()
+	}
+
 	if *metasploitFlag {
 		metasploitModules()
 	}
+
+	if *aquatoneFlag || *allFlag {
+		runAquatone()
+	}
+
 	if *aquatoneFlag {
 		runAquatone()
 	}
+
+	if *enum4linuxFlag || *allFlag {
+		runEnum4linux()
+	}
+
 	if *enum4linuxFlag {
 		runEnum4linux()
 	}
+
+	if *netexecFlag || *allFlag {
+		runNetexec()
+	}
+
 	if *netexecFlag {
 		runNetexec()
 	}
+
+	if *vulnersScanFlag || *allFlag {
+		if *targetFile == "" {
+			fmt.Println("[ERROR] --target-file is required for --vulners-scan")
+			return
+		}
+		vulnersScan(*targetFile, *excludeFile)
+	}
+
 	if *vulnersScanFlag {
 		if *targetFile == "" {
 			fmt.Println("[ERROR] --target-file is required for --vulners-scan")
@@ -612,6 +651,11 @@ func main() {
 		}
 		vulnersScan(*targetFile, *excludeFile)
 	}
+
+	if *nmapVulnScanFlag || *allFlag {
+		nmapVulnScan(*targetFile, *excludeFile)
+	}
+
 	if *nmapVulnScanFlag {
 		if *targetFile == "" {
 			fmt.Println("[ERROR] --target-file is required for --nmap-vuln-scan")
@@ -619,33 +663,83 @@ func main() {
 		}
 		nmapVulnScan(*targetFile, *excludeFile)
 	}
+
+	if *nmapServiceScanFlag || *allFlag {
+		nmapServiceScan()
+	}
+
 	if *nmapServiceScanFlag {
 		nmapServiceScan()
 	}
+
+	if *niktoFlag || *allFlag {
+		runNikto()
+	}
+
 	if *niktoFlag {
 		runNikto()
 	}
+
+	if *ftpAnonFlag || *allFlag {
+		checkFTPAnonymous()
+	}
+
 	if *ftpAnonFlag {
 		checkFTPAnonymous()
 	}
+
+	if *snmpEnumFlag || *allFlag {
+		snmpEnum()
+	}
+
 	if *snmpEnumFlag {
 		snmpEnum()
 	}
+
+	if *sslTLSChecksFlag || *allFlag {
+		nmapSSLScan()
+	}
+
 	if *sslTLSChecksFlag {
 		nmapSSLScan()
 	}
+
+	if *openDatabasesFlag || *allFlag {
+		checkOpenDatabases()
+	}
+
 	if *openDatabasesFlag {
 		checkOpenDatabases()
 	}
+
+	if *defaultCredsFlag || *allFlag {
+		defaultCredentialsCheck()
+	}
+
 	if *defaultCredsFlag {
 		defaultCredentialsCheck()
 	}
+
+	if *sshLoginFlag || *allFlag {
+		sshLogin()
+	}
+
 	if *sshLoginFlag {
 		sshLogin()
 	}
+
+	if *telnetLoginFlag || *allFlag {
+		telnetLogin()
+	}
+
 	if *telnetLoginFlag {
 		telnetLogin()
 	}
+
+	if *ipmiScanFlag || *allFlag {
+		ipmiScan()
+	}
+
 	if *ipmiScanFlag {
 		ipmiScan()
 	}
