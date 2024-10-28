@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -542,6 +543,16 @@ func readLines(path string) []string {
 	return lines
 }
 
+// isExcluded checks if a CIDR is in the exclusions list
+func isExcluded(cidr string, exclusions []string) bool {
+	for _, exclusion := range exclusions {
+		if exclusion == cidr {
+			return true
+		}
+	}
+	return false
+}
+
 // Main Function
 func main() {
 	nmapLiveFlag := flag.Bool("nmap-live", false, "Run a live host discovery with Nmap")
@@ -726,9 +737,28 @@ func main() {
 
 	if *sshLoginFlag {
 		sshLogin()
-	}
+		if *ipmiScanFlag || *allFlag {
+			ipmiScan()
+		}
 
-	if *telnetLoginFlag || *allFlag {
+		// Process CIDR ranges and exclusions if targetFile and excludeFile are provided
+		if *targetFile != "" && *excludeFile != "" {
+			cidrRanges := readLines(*targetFile)
+			exclusions := readLines(*excludeFile)
+
+			for _, cidr := range cidrRanges {
+				if _, _, err := net.ParseCIDR(cidr); err != nil {
+					log.Printf("Invalid CIDR: %s\n", cidr)
+					continue
+				}
+				if isExcluded(cidr, exclusions) {
+					log.Printf("Excluded CIDR: %s\n", cidr)
+					continue
+				}
+				fmt.Printf("Scanning CIDR: %s\n", cidr)
+				// Add your scanning logic here
+			}
+		}
 		telnetLogin()
 	}
 
